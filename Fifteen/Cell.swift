@@ -19,21 +19,17 @@ class CellGrid: ObservableObject {
     var rows: Int
     var cols: Int
     var zeroIndex: Int = 0
-    
-    func validLocation(_ location: Location) -> Bool {
-        if location.row - 1 > 0 && location.row + 1 <= self.rows {
-            return false
-        }
-        return true
-    }
-    
+      
     init(rows:Int, cols:Int) {
         self.rows = rows
         self.cols = cols
-
         for i in 0..<(rows * cols) {
             cells.append(Cell(id:i,grid:self))
         }
+    }
+    
+    var neighborsOfZero:[Location] {
+        neighborsOf(locationFrom(zeroIndex))
     }
     
     func swapWithZero(_ cell: Cell) {
@@ -63,32 +59,31 @@ class CellGrid: ObservableObject {
         Location(row: index / self.cols, col: index % self.cols)
     }
     
-    func neighbor(above location: Location) -> Location? {
-        guard location.row - 1 < 0 else {
-            return Location(row: location.row - 1, col: location.col)
-        }
-        return nil
+    func locationIsValid(_ location: Location) -> Bool {
+        location.row >= 0 && location.row < self.rows
+            && location.col >= 0 && location.col < self.cols
     }
-    func neighbor(below location: Location) -> Location? {
-        guard location.row + 1 > self.rows else {
-            return Location(row: location.row + 1, col: location.col)
+    func neighborsOf(_ location: Location) -> [Location] {
+        var neighbors: [Location] = []
+        for neighbor in [
+            { (home:Location) -> Location in
+                Location(row: home.row - 1,col: home.col)
+            },
+            { (home:Location) -> Location in
+                Location(row: home.row + 1,col: home.col)
+            },
+            { (home:Location) -> Location in
+                Location(row: home.row,col: home.col - 1)
+            },
+            { (home:Location) -> Location in
+                Location(row: home.row,col: home.col + 1)
+            }] {
+            let neighborLocation = neighbor(location)
+            if locationIsValid(neighborLocation) {
+                neighbors.append(neighborLocation)
+            }
         }
-        return nil
-    }
-    func neighbor(leftOf location: Location) -> Location? {
-        guard location.col - 1 < 0 else {
-            return Location(row: location.row, col: location.col - 1)
-        }
-        return nil
-    }
-    func neighbor(rightOf location: Location) -> Location? {
-        guard location.col + 1 < 0 else {
-            return Location(row: location.row, col: location.col + 1)
-        }
-        return nil
-    }
-    func neighborsOf(_ location: Location) -> [Int] {
-        for f in [{self.neighbor(above: $0)}]
+        return neighbors
     }
 }
 
@@ -101,9 +96,6 @@ class Cell: Identifiable {
     var imageName: String  {
         id == 0 ? "0.square.fill" : "\(id).square"
     }
-//    var index: Int {
-//        Int(grid.cells.firstIndex(where: {cell in cell.id == self.id})!)
-//    }
     var location: Location {
         return Location(row: currentIndex / grid.cols, col: currentIndex % grid.cols)
     }
@@ -115,8 +107,10 @@ class Cell: Identifiable {
     
     func wasTapped() {
         print("Cell \(id) at \(location) was tapped")
+        #warning("find out if tapped location is member of the neighborsOfZero")
         grid.swapWithZero(self)
         grid.display()
+        print(grid.neighborsOfZero)
     }
     func updateIndex(_ to: Int) {
         currentIndex = to
