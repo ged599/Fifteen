@@ -11,7 +11,7 @@ import SwiftUI
 struct FifteenApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().environmentObject(CellGrid(rows: 4, cols: 4))
         }
     }
 }

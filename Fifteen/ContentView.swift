@@ -8,17 +8,30 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var cellGrid: CellGrid
+    
+    let rowGuides = [
+        GridItem(.fixed(75)),
+        GridItem(.fixed(75)),
+        GridItem(.fixed(75)),
+        GridItem(.fixed(75))
+    ]
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        Spacer()
+        LazyVGrid(columns: rowGuides) {
+            ForEach(cellGrid.cells) { cell in
+                Button(action: cell.wasTapped, label: {
+                    Image(systemName: cell.imageName).resizable().frame(width: 75, height: 75)
+                }).foregroundColor(.black)
+            }
         }
         .padding()
+        Spacer()
+        Spacer()
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView().environmentObject(CellGrid(rows:4, cols:4))
 }
