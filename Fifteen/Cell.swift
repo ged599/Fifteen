@@ -8,7 +8,7 @@
 //import Foundation
 import SwiftUI
 
-struct Location {
+struct Location: Equatable {
     let row: Int
     let col: Int
 }
@@ -49,6 +49,10 @@ class CellGrid: ObservableObject {
             }
             print("")
         }
+    }
+    
+    func isNeighborOfZero(_ location: Location) -> Bool {
+        neighborsOfZero.contains(location)
     }
     
     func indexFrom(_ location:Location) -> Int {
@@ -105,12 +109,18 @@ class Cell: Identifiable {
         self.currentIndex = id
     }
     
+    //func isNeighborOfZero() -> Bool {
+    //}
+    
     func wasTapped() {
-        print("Cell \(id) at \(location) was tapped")
-        #warning("find out if tapped location is member of the neighborsOfZero")
-        grid.swapWithZero(self)
-        grid.display()
-        print(grid.neighborsOfZero)
+        if (id == 0 || !grid.isNeighborOfZero(self.location)) {
+            print("inactive cell \(id) at \(location) ignored")
+        } else {
+            print("tap \(id) at \(location) accepted")
+            grid.swapWithZero(self)
+            grid.display()
+            // print(grid.neighborsOfZero)
+        }
     }
     func updateIndex(_ to: Int) {
         currentIndex = to
