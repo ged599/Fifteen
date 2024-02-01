@@ -11,6 +11,10 @@ import SwiftUI
 struct Location: Equatable {
     let row: Int
     let col: Int
+    
+    func plus(delta: Location) -> Location {
+        Location(row: self.row + delta.row, col: self.col + delta.col)
+    }
 }
 
 class CellGrid: ObservableObject {
@@ -36,7 +40,7 @@ class CellGrid: ObservableObject {
         let cellIndex = cell.currentIndex
         cells[zeroIndex] = cell
         cells[cellIndex] = Cell(id:0,grid:self)
-        cell.currentIndex = zeroIndex
+        cell.updateIndex(zeroIndex)
         zeroIndex = cellIndex
     }
     
@@ -68,6 +72,18 @@ class CellGrid: ObservableObject {
             && location.col >= 0 && location.col < self.cols
     }
     func neighborsOf(_ location: Location) -> [Location] {
+        var neighbors: [Location] = []
+        let deltas = [Location(row: -1, col: 0), Location(row: +1, col: 0),
+                      Location(row: 0, col: -1), Location(row: 0, col: +1)]
+        for delta in deltas {
+            let newLocation = location.plus(delta: delta)
+            if locationIsValid(newLocation) {
+                neighbors.append(newLocation)
+            }
+        }
+        return neighbors
+    }
+    func OBSneighborsOf(_ location: Location) -> [Location] {
         var neighbors: [Location] = []
         for neighbor in [
             { (home:Location) -> Location in
@@ -108,10 +124,7 @@ class Cell: Identifiable {
         self.grid = grid
         self.currentIndex = id
     }
-    
-    //func isNeighborOfZero() -> Bool {
-    //}
-    
+       
     func wasTapped() {
         if (id == 0 || !grid.isNeighborOfZero(self.location)) {
             print("inactive cell \(id) at \(location) ignored")
@@ -119,7 +132,7 @@ class Cell: Identifiable {
             print("tap \(id) at \(location) accepted")
             grid.swapWithZero(self)
             grid.display()
-            // print(grid.neighborsOfZero)
+            print(grid.neighborsOfZero)
         }
     }
     func updateIndex(_ to: Int) {
