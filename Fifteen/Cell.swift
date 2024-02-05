@@ -105,6 +105,17 @@ class CellGrid: ObservableObject {
         }
         return neighbors
     }
+    func cellAt(location: Location) -> Cell {
+        cells[self.indexFrom(location)]
+    }
+    func shuffleOnce() {
+        self.shuffle()
+    }
+    func shuffle(swaps:Int = 1) {
+        for _ in 0..<swaps {
+            self.swapWithZero(cellAt(location: self.neighborsOfZero.randomElement()!))
+        }
+    }
 }
 
 class Cell: Identifiable {
